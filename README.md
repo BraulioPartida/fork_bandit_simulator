@@ -1,12 +1,4 @@
-<head>
-  <meta charset="utf-8">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
-</head>
-  
-  
-clave unica ______________________________  
+clave unica: 207584  
 
 # Problema de Multi-Bandas (Multi-Armed Bandit): Teoría e Implementación
 
@@ -117,8 +109,7 @@ En el entorno de Banda Fija, cada brazo tiene una probabilidad constante de reco
 **RESPUESTA**  
 Definir el problema de decisión para la Banda Fija con horizonte de tiempo conocido T = 100. ¿Cuál es la función objetivo? ¿Cuáles son las restricciones? ¿Cuál es la política óptima?
 ```latex
-
-
+max E[100 suma t=1 de r_t], no hay rest, Thompson Sampling
 
 
 
@@ -134,7 +125,7 @@ Definir el problema de decisión para la Banda Fija con horizonte de tiempo cono
 Definir el problema de decisión para la Banda Fija con horizonte de tiempo desconocido T ~ Uniform(1, 300). ¿Cómo afecta el horizonte de tiempo aleatorio la estrategia óptima?
 ```latex
 
-
+max E[100 suma t=1 de r_t], no hay rest, Thompson Sampling se ajusta a la T
 
 
 
@@ -163,8 +154,7 @@ En el entorno de Banda Periódica, la probabilidad de recompensa de cada brazo c
 Definir el problema de decisión para la Banda Periódica con horizonte de tiempo conocido T = 100 y período k = 10. ¿Cómo abordarías la búsqueda de una estrategia óptima? ¿Qué información adicional sería valiosa rastrear?
 ```latex
 
-
-
+Considerar cada bloque de 10 por separado, en esos cada 10 usar max E[100 suma t=1 de r_t], no hay rest, Thompson Sampling se ajusta a la T 
 
 
 
@@ -177,8 +167,49 @@ Definir el problema de decisión para la Banda Periódica con horizonte de tiemp
 **RESPUESTA**  
 Definir el problema de decisión para la Banda Periódica con horizonte de tiempo desconocido T ~ Uniform(1, 300) y período k = 10. ¿Cómo interactúa la aleatoriedad en T con la naturaleza periódica del entorno?
 ```latex
+Considerar cada bloque de 10 por separado, en esos cada 10 usar max E[100 suma t=1 de r_t], no hay rest, Thompson Sampling se ajusta a la T y tambien guardar el historial de sobre el ganador de cada bloque para el donde se acabe  
+Impacto en la exploración/explotación:
 
+Si 𝑇
+T fuera fijo y grande, sería óptimo aprender las tasas de éxito en cada período y explotar el mejor brazo.
 
+Como 
+𝑇
+T es aleatorio y puede ser corto, una exploración excesiva puede ser costosa, ya que el juego podría terminar antes de obtener suficiente información.
+
+Dificultad en la adaptación a cambios periódicos:
+
+Si 
+𝑇
+T es pequeño, los cambios en 
+𝑝
+1
+(
+𝑡
+)
+p 
+1
+​
+ (t) y 
+𝑝
+2
+(
+𝑡
+)
+p 
+2
+​
+ (t) podrían no importar mucho porque el juego termina antes de que se vean muchos cambios.
+
+Si 
+𝑇
+T es grande, el algoritmo debe detectar y adaptarse rápidamente a los cambios periódicos en las probabilidades de los brazos.
+
+Dilema de exploración en entornos no estacionarios:
+
+En un problema de banda fija, una estrategia como Thompson Sampling o UCB podría funcionar bien.
+
+En este caso, se necesita un método que detecte cambios en las distribuciones de recompensa y ajuste la política en consecuencia.
 
 
 
@@ -204,7 +235,7 @@ En el entorno de Banda Dinámica, las probabilidades de recompensa para ambos br
 **RESPUESTA**  
 Definir el problema de decisión para la Banda Dinámica con horizonte de tiempo conocido T = 100. ¿Hay una forma significativa de aprender de observaciones pasadas en este entorno? ¿Cuál sería la estrategia óptima?
 ```latex
-
+No hay forma significativa de aprender de observaciones pasadas, la estrategia optima seria escojer la que sea con proba de 0.5
 
 
 
@@ -219,7 +250,7 @@ Definir el problema de decisión para la Banda Dinámica con horizonte de tiempo
 **RESPUESTA**  
 Definir el problema de decisión para la Banda Dinámica con horizonte de tiempo desconocido T ~ Uniform(1, 300). ¿Cambia significativamente el enfoque óptimo en este entorno altamente dinámico si el horizonte de tiempo es desconocido?
 ```latex
-
+no
 
 
 
@@ -249,7 +280,10 @@ En el entorno de Banda Totalmente Aleatorio, las probabilidades de los brazos se
 **RESPUESTA**  
 Definir el problema de decisión para la Banda Totalmente Aleatoria con horizonte de tiempo conocido T = 100. ¿Cómo equilibrarías la exploración y explotación sabiendo que las probabilidades de los brazos podrían cambiar repentinamente?
 ```latex
+Thompson Sampling
+Mantener distribuciones Beta para cada brazo y muestrear valores para decidir cuál probar.
 
+Ajustar las distribuciones a medida que obtenemos más datos
 
 
 
@@ -264,7 +298,15 @@ Definir el problema de decisión para la Banda Totalmente Aleatoria con horizont
 **RESPUESTA**  
 Definir el problema de decisión para la Banda Totalmente Aleatoria con horizonte de tiempo desconocido T ~ Uniform(1, 300). ¿Cómo interactúan las dos formas de aleatoriedad (en las probabilidades de los brazos y en el horizonte de tiempo)?
 ```latex
+Explorar inicialmente pero sin exagerar Thompson Sampling en lugar 
 
+Explotar cuando encontramos un buen brazo, pero monitoreando las recompensas.
+
+Reiniciar exploración temporalmente si se detectan cambios en la recompensa.
+
+Ajustar la exploración según la cantidad de turnos jugados (si 
+𝑇
+T no ha terminado después de muchos turnos, se puede permitir más exploración)
 
 
 
