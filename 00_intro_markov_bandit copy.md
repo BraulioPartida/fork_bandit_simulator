@@ -372,12 +372,39 @@ Finalmente, para cada problema, **añade una breve “pregunta de intuición”*
 
 **Definición del Problema**
 ```
+Espacio de estados:
+  - Cada brazo i (i = 1,2) tiene un conjunto finito de estados \(\mathcal{X}^{(i)}\). 
+  - El estado global en el turno \(t\) se denota como \(X_t = (X_t^{(1)}, X_t^{(2)})\); aunque el agente no lo observa, conoce la forma y la dinámica de transición.
+
+Transiciones:
+  - Cada brazo evoluciona de forma independiente con matrices de transición \(P_i(x' \mid x)\) que son conocidas.
+  
+Acciones:
+  - En cada turno, el proceso de decisión se divide en dos fases:
+    1. Fase de Consulta: El agente elige uno de los dos brazos (por ejemplo, brazo 1 o 2) para obtener la probabilidad actual de éxito \(p_i(t)\) de ese brazo.
+    2. Fase de Elección: Con base en la información consultada y el conocimiento previo (por ejemplo, la historia, el bono de exploración, etc.), el agente decide cuál brazo jalar en ese turno.
+    
+Observaciones:
+  - Tras la consulta, el agente recibe la probabilidad exacta de éxito del brazo consultado.
+  - Al ejecutar la acción (jalar un brazo), se observa la recompensa \(R_t\) (por ejemplo, una muestra Bernoulli) a la que se suma un bono de exploración \(\beta\,B_t\).
+
+Objetivo:
+  - Se busca maximizar la recompensa acumulada en un horizonte fijo \(T\); formalmente:
+    \[
+    \max_{\text{Pol}} \ \mathbb{E}\left[\sum_{t=1}^{T} \left(R_t + \beta\,B_t\right)\right],
+    \]
+  donde la política \(\text{Pol}\) puede usar la información de la consulta para tomar mejores decisiones.
+
+Actualización de creencias:
+  - Dado que las transiciones son conocidas, el agente puede, si lo desea, actualizar su creencia sobre el estado usando el algoritmo Forward; sin embargo, la nueva consulta le da, en cada turno, una información directa sobre la probabilidad de éxito de uno de los brazos.
+
 
 
 ```
 
 **Pregunta de Intuición**
 ```
+¿De qué manera disponer en cada turno de la probabilidad exacta de éxito de un brazo (a través de la consulta) podría modificar la estrategia óptima en comparación con sólo observar la recompensa obtenida tras jalar un brazo?
 
 
 ```
@@ -411,12 +438,34 @@ Finalmente, para cada problema, **añade una breve “pregunta de intuición”*
 
 **Definición del Problema**
 ```
+Espacio de estados y Transiciones:
+  - Cada brazo i tiene un conjunto finito de estados \(\mathcal{X}^{(i)}\) y el estado global es \(X_t = (X_t^{(1)}, X_t^{(2)})\); sin embargo, las matrices de transición \(P_i(x'\mid x)\) son desconocidas.
+  - El agente debe aprender estas transiciones a lo largo del tiempo mediante la actualización de una creencia o mediante métodos de aprendizaje (por ejemplo, EM o enfoques bayesianos).
+
+Acciones:
+  - En cada turno se realiza:
+    1. Fase de Consulta: Se elige uno de los dos brazos para consultar y obtener su probabilidad actual de éxito. Esta probabilidad se obtiene en ese instante a partir de la dinámica subyacente, aunque las transiciones son desconocidas.
+    2. Fase de Elección: Tras la consulta, el agente decide cuál brazo jalar y así obtiene la recompensa \(R_t\) (más el bono \(\beta\,B_t\)).
+    
+Observaciones:
+  - La consulta revela la probabilidad de éxito instantánea del brazo consultado.
+  - La única observación tras la acción es la recompensa del brazo elegido.
+  
+Objetivo:
+  - Maximizar la suma de recompensas (más bono de exploración) en un horizonte fijo \(T\):
+    \[
+    \max_{\text{Pol}} \ \mathbb{E}\left[\sum_{t=1}^{T} \left(R_t + \beta\,B_t\right)\right].
+    \]
+    
+Actualización de creencias:
+  - Debido a que las transiciones son desconocidas, el agente debe actualizar una creencia sobre los parámetros de transición. La consulta de la probabilidad actual sirve para acortar la incertidumbre en cada turno, ya sea para explotar de forma directa o para afinar la estimación de la matriz de transición.
 
 
 ```
 
 **Pregunta de Intuición**
 ```
+Dado que las transiciones son desconocidas y el agente debe aprender la dinámica, ¿en qué medida la consulta de la probabilidad actual de éxito de un brazo en cada turno aceleraría la identificación de sus parámetros o favorecería más la explotación inmediata?
 
 
 ```
@@ -450,12 +499,34 @@ Finalmente, para cada problema, **añade una breve “pregunta de intuición”*
 
 **Definición del Problema**
 ```
+Espacio de estados y Transiciones:
+  - El estado global está definido como \(X_t = (X_t^{(1)}, X_t^{(2)})\), donde cada componente proviene de un conjunto finito, y las transiciones de ambos brazos pueden estar correlacionadas mediante una matriz de transición conjunta \(P(x_{t+1}\mid x_t,A_t)\), la cual es conocida.
+  
+Acciones:
+  - Cada turno se divide en dos fases:
+    1. Fase de Consulta: El agente elige uno de los dos brazos para obtener en ese instante la probabilidad actual de éxito de ese brazo.
+    2. Fase de Elección: Luego, con base en la información obtenida y el conocimiento de la dinámica conjunta (transiciones conocidas), el agente decide qué brazo jalar y obtiene la recompensa correspondiente, sumada al bono de exploración \(\beta\,B_t\).
+    
+Observaciones:
+  - La consulta proporciona la probabilidad de éxito actual del brazo seleccionado, y dado el conocimiento de \(P\), esta información puede ser usada para inferir parte del estado global y, potencialmente, hacer inferencias sobre el otro brazo.
+  - La única observación posterior es la recompensa obtenida del brazo jalar.
+  
+Objetivo:
+  - Maximizar la suma de las recompensas y bonos en un horizonte fijo \(T\):
+    \[
+    \max_{\text{Pol}} \ \sum_{t=1}^{T} \left(R_t + \beta\,B_t\right),
+    \]
+  aprovechando que las transiciones \(P\) son conocidas y, en cada turno, se obtiene información adicional a través de la consulta.
+  
+Actualización de creencias:
+  - Al conocer \(P\), el agente puede (si lo desea) actualizar su creencia sobre el estado global; la consulta de un brazo contribuye con información directa sobre su probabilidad de éxito, lo cual, debido a la correlación en \(P\), puede informar indirectamente sobre el estado del otro brazo.
 
 
 ```
 
 **Pregunta de Intuición**
 ```
+Teniendo en cuenta que las transiciones están correlacionadas y se conocen, ¿cómo podría la consulta de la probabilidad de éxito de un brazo ayudar a inferir o ajustar la creencia sobre el estado del otro brazo, y en qué medida esto afectaría la selección final de la acción?
 
 
 ```
@@ -488,12 +559,35 @@ Finalmente, para cada problema, **añade una breve “pregunta de intuición”*
 
 **Definición del Problema**
 ```
+Espacio de estados y Transiciones:
+  - El estado del sistema es \(X_t = (X_t^{(1)},X_t^{(2)})\), el cual es oculto para el agente. Las transiciones pueden ser ya conocidas o desconocidas y, en este último caso, deben ser aprendidas; además, pueden ser independientes o depender conjuntamente entre los dos brazos.
+  
+Acciones:
+  - En cada turno, el agente tiene dos fases de acción:
+    1. Fase de Consulta: Consulta la probabilidad actual de éxito de uno de los brazos, obteniendo información directa sobre dicho brazo para ese turno.
+    2. Fase de Elección: Basándose en la consulta, en su creencia (actualizada mediante técnicas de filtrado o posterior bayesiano en el caso de transiciones desconocidas) y en las posibles estrategias de exploración (por ejemplo, con bono de exploración \(\beta\,B_t\)), el agente decide qué brazo jalar.
+  - El horizonte puede ser aleatorio o infinito, lo que implica que la política puede ser formulada en términos de un POMDP o con un descuento futuro.
+  
+Observaciones:
+  - La consulta ofrece la probabilidad actual de éxito del brazo consultado, lo que reduce la incertidumbre parcial en ese turno.
+  - Tras jalar un brazo, la única observación directa es la recompensa \(R_t\) (más el bono) que contribuye a la actualización de la creencia sobre el estado oculto.
+  
+Objetivo:
+  - Maximizar la recompensa acumulada (incluyendo el bono de exploración) en un horizonte que puede ser aleatorio o infinito:
+    \[
+    \max_{\text{Pol}} \ \mathbb{E}\left[\sum_{t=1}^{T} \left(R_t + \beta\,B_t\right)\right]
+    \]
+  donde la política usa la consulta y la actualización de creencias para actuar de forma óptima en un entorno de observabilidad parcial.
+  
+Actualización de creencias:
+  - Sea mediante algoritmos de filtrado (Forward) o con métodos de aprendizaje (Baum-Welch, posterior bayesiano), se actualiza la creencia sobre \(X_t\) utilizando la recompensa observada y la información extraída de la consulta.
 
 
 ```
 
 **Pregunta de Intuición**
 ```
+En un entorno de observabilidad parcial con horizonte aleatorio, ¿la consulta de la probabilidad de éxito de un brazo favorecería una explotación más segura de ese brazo o sería fundamental para refinar las creencias a lo largo del tiempo, permitiendo una mejor planificación a futuro?
 
 
 ```
