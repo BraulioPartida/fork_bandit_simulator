@@ -1,6 +1,6 @@
 
   
-clave unica ______________________________  
+clave unica 207584
 
 # Bandidos de Markov de Dos Brazos  
 Una **Guía Paso a Paso** para Modelar, Problemas de Decisión Básicos y Variaciones  
